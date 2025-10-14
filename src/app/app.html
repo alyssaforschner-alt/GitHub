@@ -1,0 +1,53 @@
+<div class="app-shell" [class.neon-theme]="isNeon()" [class.no-topbar]="!showTopbar()">
+  <header class="page-header" *ngIf="showTopbar()">
+    <button class="icon-btn ghost" aria-label="Home" type="button" (click)="onHomeClick()">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-10.5Z" stroke="currentColor" stroke-width="1.6" fill="none"/>
+      </svg>
+    </button>
+    <div class="page-title">Wordle</div>
+    <div class="header-actions">
+      <button class="icon-btn ghost" aria-label="Anleitung" type="button" (click)="openHelp()">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 8.4c-.9 0-1.6-.6-1.6-1.4S11.1 5.6 12 5.6s1.6.6 1.6 1.4S12.9 8.4 12 8.4Zm0 2.2c.9 0 1.6.6 1.6 1.4v4.4h-3.2V12c0-.8.7-1.4 1.6-1.4Z" fill="currentColor"/></svg>
+      </button>
+      <button class="icon-btn ghost" aria-label="History" type="button" (click)="openHistory()">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13h3v7H5v-7Zm5-6h3v13h-3V7Zm5 3h3v10h-3V10Z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="app-content">
+    <router-outlet />
+  </div> <!-- /app-content -->
+
+  <!-- Modals -->
+  <div class="modal-scrim" *ngIf="showHelp() || showHistory() || showExit()" (click)="closeModals()"></div>
+
+  <section class="modal" *ngIf="showExit()" role="dialog" aria-labelledby="exit-title" aria-modal="true">
+    <h2 id="exit-title" class="modal-title">Do you really want to exit?</h2>
+    <div class="modal-actions">
+      <button class="btn teal" type="button" (click)="confirmExit()">Yes</button>
+      <button class="btn purple" type="button" (click)="closeModals()">No</button>
+    </div>
+  </section>
+
+  <section class="modal" *ngIf="showHelp()" role="dialog" aria-labelledby="help-title" aria-modal="true">
+    <h2 id="help-title" class="modal-title">Anleitung</h2>
+    <ul class="modal-list">
+      <li>Errate das 5‑Buchstaben‑Wort in 6 Versuchen.</li>
+      <li>Grün = richtig, Gelb = falsche Position, Grau = nicht enthalten.</li>
+      <li>Enter prüft, Backspace löscht das letzte Zeichen.</li>
+    </ul>
+    <div class="modal-actions">
+      <button class="btn" type="button" (click)="closeModals()">Schließen</button>
+    </div>
+  </section>
+
+  <section class="modal" *ngIf="showHistory()" role="dialog" aria-labelledby="history-title" aria-modal="true">
+    <h2 id="history-title" class="modal-title">History</h2>
+    <p class="modal-text">Bald siehst du hier deinen Spielverlauf und Statistiken.</p>
+    <div class="modal-actions">
+      <button class="btn" type="button" (click)="closeModals()">Schließen</button>
+    </div>
+  </section>
+</div> <!-- /app-shell -->
