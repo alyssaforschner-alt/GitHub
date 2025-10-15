@@ -13,11 +13,28 @@ a{color:var(--brand)}
 
 .home-background{
   min-height: 100vh;
-  background-image: url('C:\Users\Administrator\OneDrive - Duale Hochschule Baden-Württemberg Stuttgart\Desktop\DHBW\3. Semester\WebProgramming\Background');
+  background-image: url('./Background/531cc7cd0af204903a9f98d2fbc48a6b07d113a7 (2).png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
+
+/* Global blurred background for all non-home/start pages */
+body{ background: var(--bg); }
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:url('./Background/531cc7cd0af204903a9f98d2fbc48a6b07d113a7 (2).png');
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  filter:blur(12px);
+  transform:scale(1.06); /* hide blur edges */
+  z-index:-1;
+}
+/* When a page provides its own crisp background (e.g., Home/Start), disable the global blur */
+body:has(.home-background)::before{ content:none; }
 
 /* Simple universal header used on most pages */
 .page-header{position:fixed;top:0;left:0;right:0;height:56px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:8px 12px;z-index:40}

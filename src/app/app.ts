@@ -43,11 +43,11 @@ export class App implements OnDestroy {
     // Initialize document class for external pages
     this.applyNeonClass(this.isNeon());
 
-    // Hide topbar on Start and Login screens
+    // Hide topbar on Start ("/"), Home ("/home"), and Login ("/login") screens
     const setFromUrl = (url: string) => {
       const path = url.split('?')[0];
       this.currentPath.set(path);
-      const hide = path === '/home';
+      const hide = path === '/home' || path === '/' || path === '' || path === '/login';
       this.showTopbar.set(!hide);
     };
     setFromUrl(this.router.url);
