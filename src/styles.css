@@ -43,27 +43,26 @@ body:has(.home-background)::before{ content:none; }
 .icon-btn.ghost{color:#c8eaff; border-radius:999px; box-shadow:0 0 10px rgba(0,234,255,.28)}
 .page-header .icon-btn{width:36px;height:36px;display:inline-grid;place-items:center;padding:0}
 .page-header .icon-btn svg{width:26px;height:26px}
-/* Modal styles */
-.modal-scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);z-index:70}
+/* Modal styles (match reference screenshot) */
+.modal-scrim{position:fixed;inset:0;background:rgba(5,10,20,.55);backdrop-filter:blur(8px);z-index:70}
+.modal-scrim::after{content:"";position:absolute;inset:0;border:1px solid rgba(255,255,255,.06);box-shadow:0 0 80px rgba(0,0,0,.55) inset;pointer-events:none}
 .modal{position:fixed;inset:0;display:grid;place-items:center;z-index:80}
 .modal> *{margin:0}
-/* Glass panel look like the mock */
+/* No glass panel; text + buttons float on blurred bg */
 .modal{--panel-w:min(840px,92vw);--panel-h:min(460px,80vh)}
-.modal::before{content:"";position:absolute;width:var(--panel-w);min-height:var(--panel-h);border-radius:10px;border:1px solid rgba(255,255,255,.16);background:
-  radial-gradient(600px 260px at 86% 12%, rgba(255,78,205,.22), transparent 60%),
-  linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.34));
-  box-shadow:0 26px 80px rgba(0,0,0,.45), inset 0 0 120px rgba(255,255,255,.05);
-}
+.modal::before{content:none}
 .modal{pointer-events:none}
 .modal .modal-title, .modal .modal-actions, .modal .modal-list, .modal .modal-text{pointer-events:auto}
-.modal .modal-title{position:relative;z-index:1;color:#e9eef7;text-transform:uppercase;letter-spacing:.22em;text-align:center;font-weight:500;font-size:clamp(18px,3.2vw,30px);line-height:1.35;margin-bottom:18px}
-.modal .modal-list{position:relative;z-index:1;max-width:640px;padding:0 24px 8px}
-.modal .modal-text{position:relative;z-index:1;max-width:640px;padding:0 24px 8px;text-align:center}
-.modal .modal-actions{position:relative;z-index:1;display:grid;gap:14px;justify-items:center;margin-top:8px}
-/* Buttons like the mock */
-.modal .btn{width:min(440px,80vw);height:56px;border-radius:8px;text-transform:uppercase;letter-spacing:.2em;font-weight:700}
-.btn.teal{background:linear-gradient(180deg, rgba(34,146,170,.65), rgba(4,51,63,.65));color:#e6f6ff;border:1px solid rgba(0,234,255,.32);box-shadow:inset 0 1px rgba(255,255,255,.15)}
-.btn.purple{background:linear-gradient(180deg, rgba(120,34,120,.55), rgba(70,20,70,.55));color:#f2e6ff;border:1px solid rgba(255,78,205,.28);box-shadow:inset 0 1px rgba(255,255,255,.12)}
+.modal .modal-title{position:relative;z-index:1;color:#ffffff;text-transform:uppercase;letter-spacing:.28em;text-align:center;font-weight:600;font-size:clamp(20px,3.2vw,32px);line-height:1.18;margin-bottom:20px;font-family: "Inter","Montserrat","Segoe UI",Roboto,Arial,sans-serif}
+.modal .modal-list{position:relative;z-index:1;max-width:420px;padding:0 24px 8px;color:#ffffff;font-family: "Inter","Montserrat","Segoe UI",Roboto,Arial,sans-serif}
+.modal .modal-text{position:relative;z-index:1;max-width:420px;padding:0 24px 8px;text-align:center;color:#ffffff;font-family: "Inter","Montserrat","Segoe UI",Roboto,Arial,sans-serif}
+.modal .modal-actions{position:relative;z-index:1;display:grid;gap:16px;justify-items:center;margin-top:10px;max-width:420px;width:100%}
+/* Buttons styled like the screenshot */
+.modal .btn{width:min(300px,84vw);height:48px;border-radius:6px;text-transform:uppercase;letter-spacing:.28em;font-weight:600;font-size:clamp(14px,1.6vw,18px);color:#ffffff;border:1px solid transparent;backdrop-filter:saturate(110%) blur(1.5px);font-family: "Inter","Montserrat","Segoe UI",Roboto,Arial,sans-serif}
+.btn.teal{background:linear-gradient(180deg, rgba(16,70,82,.9), rgba(10,52,60,.9));border-color:rgba(68,188,204,.55);color:#ffffff;box-shadow:0 8px 22px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.06)}
+.btn.purple{background:linear-gradient(180deg, rgba(60,20,60,.88), rgba(46,14,46,.88));border-color:rgba(199,92,165,.5);color:#ffffff;box-shadow:0 8px 22px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.05)}
+.modal .btn:hover{filter:brightness(1.06)}
+.modal .btn:active{transform:translateY(1px)}
 .container{max-width:1100px;margin:0 auto;padding:24px}
 header.hero{display:grid;gap:18px;align-items:center;grid-template-columns:1fr; padding:42px 0}
 .title{font-size:clamp(28px,5vw,46px);line-height:1.1;margin:0}
