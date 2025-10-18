@@ -1,0 +1,31 @@
+:root{
+  --bg:#0f1220; --panel:#171a2a; --muted:#9aa3b2; --text:#e9eef7; --brand:#7c5cff; --brand-2:#4dd4ff; --ok:#22c55e; --warn:#fbbf24; --bad:#64748b; --border:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+.container{max-width:1100px;margin:0 auto;padding:24px}
+header.hero{display:grid;gap:18px;align-items:center;grid-template-columns:1fr; padding:42px 0}
+.title{font-size:clamp(28px,5vw,46px);line-height:1.1;margin:0}
+.subtitle{margin:0;color:var(--muted);font-size:clamp(16px,2.5vw,20px)}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.btn{appearance:none;border:1px solid var(--border);background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#0b0e1a;padding:12px 16px;border-radius:12px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(94,76,255,.25);}
+.btn.secondary{background:transparent;color:var(--text)}
+.grid{display:grid;gap:16px}
+.grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.grid.cols-3,.grid.cols-2{grid-template-columns:1fr}}
+.card{background:rgba(23,26,42,.6); border:1px solid var(--border); padding:18px;border-radius:16px;backdrop-filter: blur(6px)}
+h2{font-size:22px;margin:18px 0 12px}
+h3{font-size:18px;margin:14px 0 8px;color:#cdd6e5}
+ul{padding-left:18px;margin:8px 0}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:#0c0f1d;border:1px solid var(--border);padding:14px;border-radius:12px;overflow:auto}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#111425}
+.kbd{border:1px solid var(--border);padding:.2em .5em;border-radius:6px;background:#111425}
+.board{display:grid;grid-template-columns:repeat(5,48px);gap:8px}
+.tile{width:48px;height:48px;border-radius:10px;display:grid;place-items:center;font-weight:800;letter-spacing:1px;background:#0c0f1d;border:1px solid var(--border)}
+.tile.ok{background:#0e2e1a;border-color:#155e2b;color:#72ffb6}
+.tile.warn{background:#3a2c0e;border-color:#8a6d1f;color:#ffd36b}
+.tile.bad{background:#111827;border-color:#263244;color:#93a0b5}
+footer{margin:40px 0 24px;color:var(--muted);font-size:14px;text-align:center}
+.sep{height:1px;background:var(--border);margin:24px 0}

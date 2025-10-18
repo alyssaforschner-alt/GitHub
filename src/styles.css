@@ -1,0 +1,253 @@
+/* You can add global styles to this file, and also import other style files */
+
+:root{
+  --bg:#0f1220; --panel:#171a2a; --muted:#9aa3b2; --text:#e9eef7; --brand:#7c5cff; --brand-2:#4dd4ff; --ok:#22c55e; --warn:#fbbf24; --bad:#64748b; --border:rgba(255,255,255,.08);
+  --neon-green:#39ff14; --neon-cyan:#00eaff; --neon-pink:#ff4ecd; --neon-yellow:#ffeb3b;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+
+a{color:var(--brand)}
+.app-content{padding-top:56px; min-height:calc(100vh - 56px)}
+.app-shell.no-topbar .app-content{padding-top:0}
+
+.home-background{
+  min-height: 100vh;
+  background-image: url('./Background/531cc7cd0af204903a9f98d2fbc48a6b07d113a7 (2).png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Global blurred background for all non-home/start pages */
+body{ background: var(--bg); }
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:url('./Background/531cc7cd0af204903a9f98d2fbc48a6b07d113a7 (2).png');
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  filter:blur(12px);
+  transform:scale(1.06); /* hide blur edges */
+  z-index:-1;
+}
+/* When a page provides its own crisp background (e.g., Home/Start), disable the global blur */
+body:has(.home-background)::before{ content:none; }
+
+/* Simple universal header used on most pages */
+.page-header{position:fixed;top:0;left:0;right:0;height:56px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:8px 12px;z-index:40}
+.page-title {
+  justify-self: center;
+  /* font-weight: 900;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 10px rgba(0, 234, 255, .28); */
+  font-family: Michroma;
+font-size: 25px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+/* style */
+background: linear-gradient(96deg, #9FFFFF 5.17%, #21C4FF 100%);
+background-clip: text;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+text-shadow: 0 0 10px #FFFFFF;
+
+}
+.header-actions{justify-self:end;display:flex;gap:10px}
+.icon-btn.ghost{color:#c8eaff; border-radius:999px; box-shadow:0 0 10px rgba(0,234,255,.28)}
+.page-header .icon-btn{width:36px;height:36px;display:inline-grid;place-items:center;padding:0}
+.page-header .icon-btn svg{width:26px;height:26px}
+/* Modal styles (match reference screenshot) */
+.modal-scrim{position:fixed;inset:0;background:rgba(5,10,20,.55);backdrop-filter:blur(8px);z-index:70}
+.modal-scrim::after{content:"";position:absolute;inset:0;border:1px solid rgba(255,255,255,.06);box-shadow:0 0 80px rgba(0,0,0,.55) inset;pointer-events:none}
+.modal {
+position: fixed;
+inset: 0;
+z-index: 80;
+width: 50%;
+margin: 0 auto;
+top: 50%;
+transform: translateY(-50%);
+min-height: 360px;
+border: 1px solid rgba(255, 255, 255, 0.316);
+background: linear-gradient(
+  180deg,
+  rgba(255, 255, 255, 0.077),
+  rgba(255, 255, 255, 0.006));
+box-shadow: 0 20px 60px rgba(0, 0, 0, .45), inset 0 0 80px rgba(255, 255, 255, .04);
+-webkit-backdrop-filter: blur(6px);
+backdrop-filter: blur(6px);
+justify-items: center;
+display: flex;
+justify-content: center;
+align-items: center;
+flex-direction: column;
+gap: 20px;
+width: min(704px, 92vw);
+}
+.modal.rules {
+  height: 560px;
+}
+.modal> *{margin:0}
+/* No glass panel; text + buttons float on blurred bg */
+.modal{--panel-w:min(840px,92vw);--panel-h:min(460px,80vh)}
+.modal::before{content:none}
+.modal{pointer-events:none}
+.modal .modal-title, .modal .modal-actions, .modal .modal-list, .modal .modal-text{pointer-events:auto}
+.modal .modal-title {
+  position: relative;
+  z-index: 1;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: .28em;
+  text-align: center;
+  font-weight: 600;
+  font-size: clamp(20px, 3.2vw, 32px);
+  line-height: 1.18;
+  margin-bottom: 20px;
+  font-family: "Inter", "Montserrat", "Segoe UI", Roboto, Arial, sans-serif
+}
+.modal .modal-list {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+  padding: 0 24px 8px;
+  color: #ffffff;
+font-family: Michroma;
+font-size: 17px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+text-transform: uppercase;
+line-height: normal; letter-spacing:.06em;
+}
+.modal .modal-list li {display: flex; gap: 29px 25px; align-items: center; margin-bottom: 25px;}
+.modal .modal-text{position:relative;z-index:1;max-width:420px;padding:0 24px 8px;text-align:center;color:#ffffff;font-family: "Inter","Montserrat","Segoe UI",Roboto,Arial,sans-serif}
+.modal .modal-actions{position:relative;z-index:1;display:grid;gap:16px;justify-items:center;margin-top:10px;max-width:420px;width:100%}
+.modal .tile{ border-radius:9px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.078), rgba(255, 255, 255, 0.118)); border:1px solid rgba(255, 255, 255, 0.195);     color: #FFF;
+text-align: center;
+font-family: Michroma;
+font-size: 17px;
+font-style: normal;
+font-weight: 400;
+line-height: normal; letter-spacing:.06em; box-shadow: inset 0 1px 8px rgba(0,0,0,.45) }
+
+.modal .tile.ok{ background: rgba(14,46,26,.9); border-color:#1c7b3b; color:#a6ffd6; box-shadow: inset 0 0 10px rgba(57,255,20,.18) }
+.modal .tile.warn{ background: rgba(58,44,14,.9); border-color:#9d7d24; color:#ffe28a; box-shadow: inset 0 0 10px rgba(255,235,59,.16) }
+.modal .tile.bad{ background: rgba(17,24,39,.9); border-color:#2b3a4f; color:#9fb0c9 }
+/* Buttons styled like the screenshot */
+.modal .btn{width:min(300px,84vw);height:48px;border-radius:6px;text-transform:uppercase;letter-spacing:.28em;font-weight:600;font-size:clamp(14px,1.6vw,18px);color:#ffffff;border:1px solid transparent;backdrop-filter:saturate(110%) blur(1.5px);font-family: "Inter","Montserrat","Segoe UI",Roboto,Arial,sans-serif}
+.btn.teal{background:linear-gradient(180deg, rgba(16,70,82,.9), rgba(10,52,60,.9));border-color:rgba(68,188,204,.55);color:#ffffff;box-shadow:0 8px 22px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.06)}
+.btn.purple{background:linear-gradient(180deg, rgba(60,20,60,.88), rgba(46,14,46,.88));border-color:rgba(199,92,165,.5);color:#ffffff;box-shadow:0 8px 22px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.05)}
+.modal .btn:hover{filter:brightness(1.06)}
+.modal .btn:active{transform:translateY(1px)}
+.container{max-width:1100px;margin:0 auto;padding:24px}
+header.hero{display:grid;gap:18px;align-items:center;grid-template-columns:1fr; padding:42px 0}
+.title{font-size:clamp(28px,5vw,46px);line-height:1.1;margin:0}
+.subtitle{margin:0;color:var(--muted);font-size:clamp(16px,2.5vw,20px)}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.btn{appearance:none;border:1px solid var(--border);background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#0b0e1a;padding:12px 16px;border-radius:12px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(94,76,255,.25); transition:transform .08s ease, box-shadow .2s ease;}
+.btn:hover{transform:translateY(-1px)}
+.btn.secondary{background:transparent;color:var(--text)}
+.btn.neon{background:linear-gradient(135deg,var(--neon-pink),var(--neon-cyan)); color:#051017; box-shadow:0 0 12px rgba(0,234,255,.4), 0 0 24px rgba(255,78,205,.25)}
+.grid{display:grid;gap:16px}
+.grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.grid.cols-3,.grid.cols-2{grid-template-columns:1fr}}
+.card{background:rgba(23,26,42,.6); border:1px solid var(--border); padding:18px;border-radius:16px;backdrop-filter: blur(6px)}
+h2{font-size:22px;margin:18px 0 12px}
+h3{font-size:18px;margin:14px 0 8px;color:#cdd6e5}
+ul{padding-left:18px;margin:8px 0}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:#0c0f1d;border:1px solid var(--border);padding:14px;border-radius:12px;overflow:auto}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#111425}
+.kbd{border:1px solid var(--border);padding:.2em .5em;border-radius:6px;background:#111425}
+.board{display:grid;grid-template-columns:repeat(5,var(--tile,48px));gap:8px}
+.board .row{display:contents}
+.tile{width:var(--tile,48px);height:var(--tile,48px);border-radius:10px;display:grid;place-items:center;font-weight:800;letter-spacing:1px;background:#0c0f1d;border:1px solid var(--border)}
+.tile.ok{background:#0e2e1a;border-color:#155e2b;color:#72ffb6}
+.tile.warn{background:#3a2c0e;border-color:#8a6d1f;color:#ffd36b}
+.tile.bad{background:#111827;border-color:#263244;color:#93a0b5}
+footer{margin:40px 0 24px;color:var(--muted);font-size:14px;text-align:center}
+.sep{height:1px;background:var(--border);margin:24px 0}
+
+/* Topbar & Drawer (Wordle‑ähnlicher Aufbau) */
+.topbar{position:fixed;top:0;left:0;right:0;height:56px;padding:0 12px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:rgba(15,18,32,.65);backdrop-filter:blur(6px);border-bottom:1px solid var(--border);z-index:20}
+.brand{justify-self:center;font-weight:900;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.brand-text{display:inline-block}
+.brand::before,.brand::after{content:"";width:10px;height:10px;border-radius:3px;border:1px solid var(--border);background:#0c0f1d;box-shadow:0 0 6px rgba(255,255,255,.06)}
+.icon-btn{appearance:none;background:transparent;border:none;color:var(--text);cursor:pointer;padding:8px;border-radius:8px}
+.icon-btn:hover{background:rgba(255,255,255,.06)}
+.burger{display:inline-grid;gap:4px}
+.burger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;box-shadow:0 0 6px rgba(255,255,255,.2)}
+.top-actions{justify-self:end}
+
+.drawer{position:fixed;top:0;left:0;bottom:0;width:280px;background:rgba(17,20,37,.96);border-right:1px solid var(--border);transform:translateX(-100%);transition:transform .18s ease;z-index:30;display:flex;flex-direction:column}
+.drawer.open{transform:translateX(0)}
+.drawer-header{display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 12px;border-bottom:1px solid var(--border)}
+.drawer a{padding:14px 16px;color:var(--text);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.04)}
+.drawer a:hover{background:rgba(255,255,255,.06)}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:opacity .18s ease;z-index:25}
+.scrim.show{opacity:1;pointer-events:auto}
+
+/* Neon Theme Accents */
+.neon-theme .title{ color:var(--neon-cyan); text-shadow:0 0 14px rgba(0,234,255,.35), 0 0 28px rgba(0,234,255,.18) }
+.neon-theme .brand{ background:linear-gradient(90deg,var(--neon-cyan),var(--neon-pink)); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 0 10px rgba(0,234,255,.28) }
+.neon-theme .brand::before{background:rgba(0,234,255,.08); border-color:rgba(0,234,255,.4); box-shadow:0 0 8px rgba(0,234,255,.35)}
+.neon-theme .brand::after{background:rgba(255,78,205,.08); border-color:rgba(255,78,205,.4); box-shadow:0 0 8px rgba(255,78,205,.35)}
+.neon-theme h2{ color:var(--neon-pink) }
+.neon-theme h3{ color:var(--neon-yellow) }
+.neon-theme .card{ box-shadow:0 0 20px rgba(76,0,255,.08) inset, 0 0 8px rgba(0,234,255,.08) }
+.neon-theme .tile.ok{ color:var(--neon-green); box-shadow:0 0 10px rgba(57,255,20,.25) inset }
+.neon-theme .tile.warn{ color:var(--neon-yellow); box-shadow:0 0 10px rgba(255,235,59,.18) inset }
+.neon-theme .tile.bad{ color:#9fb0c9; box-shadow:0 0 8px rgba(100,116,139,.15) inset }
+.pill.neon{border-color:rgba(0,234,255,.35); box-shadow:0 0 10px rgba(0,234,255,.25) inset}
+
+/* Focus styles */
+:focus-visible{outline:2px solid var(--brand-2); outline-offset:2px}
+
+/* Game shell & keyboard */
+.game-shell{min-height:100%;display:grid;align-content:center;justify-content:center;gap:24px;padding:16px}
+.board-wrapper{display:grid;place-items:center}
+.board-wrapper{perspective:800px}
+.keyboard{display:grid;gap:8px;max-width:640px;margin:0 auto 12px}
+.key-row{display:flex;gap:8px;justify-content:center}
+.key{appearance:none;border:1px solid var(--border);background:#0c0f1d;color:var(--text);height:54px;min-width:34px;padding:0 10px;border-radius:8px;cursor:pointer;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.key.wide{min-width:72px}
+.key.ok{background:#0e2e1a;border-color:#155e2b;color:#72ffb6}
+.key.warn{background:#3a2c0e;border-color:#8a6d1f;color:#ffd36b}
+.key.bad{background:#111827;border-color:#263244;color:#93a0b5}
+.neon-theme .key{box-shadow:0 0 8px rgba(0,234,255,.12) inset}
+.key:hover{background:#111425}
+.key:active{transform:translateY(1px)}
+
+/* Home hero */
+.home-hero{display:grid;gap:10px;align-content:center;justify-items:center;padding:32px 16px 8px}
+
+/* Flip/Bounce animations */
+@keyframes tile-flip { 0%{ transform:rotateX(0) } 50%{ transform:rotateX(90deg) } 100%{ transform:rotateX(0) } }
+@keyframes tile-bounce { 0%,20%,50%,80%,100%{ transform:translateY(0) } 40%{ transform:translateY(-8px) } 60%{ transform:translateY(-4px) } }
+.tile.reveal{ transform-style:preserve-3d; backface-visibility:hidden; animation: tile-flip 600ms ease both; animation-delay: var(--delay, 0ms); }
+.row.win .tile{ animation: tile-bounce 600ms ease both; animation-delay: var(--delay, 0ms); }
+
+/* Toast */
+.toast{ position:fixed; top:64px; left:50%; transform:translateX(-50%); background:#0c0f1d; border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:10px; box-shadow:0 4px 14px rgba(0,0,0,.35); z-index:60 }
+.neon-theme .toast{ box-shadow:0 0 14px rgba(0,234,255,.18), 0 4px 14px rgba(0,0,0,.35) }
+
+/* Forms */
+.form{display:grid;gap:12px;margin-top:8px}
+.field{display:grid;gap:6px}
+.field.inline{grid-auto-flow:column;justify-content:start;align-items:center;gap:10px}
+.input{display:flex;align-items:center;height:44px;padding:0 10px;border-radius:10px;background:#0c0f1d;border:1px solid var(--border);color:var(--text)}
+.input input{all:unset;flex:1;color:inherit}
+.input.with-btn{display:grid;grid-template-columns:1fr auto;align-items:center}
+.error{color:#ff9aa2}
+.form-actions{display:flex;gap:10px;align-items:center}

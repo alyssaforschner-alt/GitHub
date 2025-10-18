@@ -1,0 +1,131 @@
+<div class="container">
+  <header class="hero">
+    <div>
+      <h1 class="title">Wordle – Projektvorstellung</h1>
+      <p class="subtitle">Ein browserbasiertes Ratespiel: Errate ein geheimes 5‑Buchstaben‑Wort in maximal sechs Versuchen. Dieses Projekt zeigt Frontend‑Logik, sauberes UI und optionales Multiplayer‑Backend.</p>
+      <div class="cta">
+        <a class="btn" href="#demo">Live‑Demo</a>
+        <a class="btn secondary" href="#installation">Installation</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="grid cols-3">
+    <div class="card">
+      <h2>Features</h2>
+      <ul>
+        <li>5×6 Spielfeld, farbcodiertes Feedback</li>
+        <li>Wörterprüfung &amp; Tastatureingabe</li>
+        <li>Lokaler Speicher für Fortschritt</li>
+        <li><strong>Optional:</strong> Tägliches Wort &amp; History</li>
+        <li><strong>Optional:</strong> Multiplayer (Race/Duell)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Tech‑Stack</h2>
+      <ul>
+        <li>Frontend: HTML, CSS, JavaScript</li>
+        <li>Optional Framework: React/Vue</li>
+        <li>Backend: Node.js (Express) + WebSocket</li>
+        <li>Daten: Wortliste (DE/EN), JSON/DB</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Use Cases</h2>
+      <ul>
+        <li>Lernprojekt für DOM &amp; State</li>
+        <li>Portfolio‑App mit sauberem UI</li>
+        <li>Web‑Sockets &amp; Realtime üben</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <section class="grid cols-2">
+    <div class="card">
+      <h2>Gameplay</h2>
+      <p>Pro Versuch gibst du ein 5‑Buchstaben‑Wort ein. Die Kacheln zeigen dir Feedback:</p>
+      <div class="board" aria-label="Beispiel-Board">
+        <div class="tile ok">W</div>
+        <div class="tile bad">O</div>
+        <div class="tile warn">R</div>
+        <div class="tile bad">T</div>
+        <div class="tile bad">E</div>
+      </div>
+      <ul>
+        <li><span class="pill" style="color:var(--ok)">Grün</span> = Buchstabe &amp; Position korrekt</li>
+        <li><span class="pill" style="color:var(--warn)">Gelb</span> = Buchstabe vorhanden, Position falsch</li>
+        <li><span class="pill" style="color:var(--bad)">Grau</span> = Buchstabe nicht im Wort</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Bewertungs‑Algorithmus (Kurz)</h2>
+      <ol>
+        <li>Erst alle <strong>grünen</strong> Positionen markieren und aus dem Zielwort zählen entfernen.</li>
+        <li>Dann übrige Buchstaben prüfen: Wenn noch Vorkommen übrig → <strong>gelb</strong>, sonst <strong>grau</strong>.</li>
+      </ol>
+      <pre ngNonBindable><code>// Pseudocode
+function evaluate(guess, target)&#123;
+  const res = Array(5).fill('bad');
+  const counts = &#123;&#125;;                      // Häufigkeit im Zielwort
+  for (let i=0;i<5;i++) counts[target[i]] = 1 + (counts[target[i]]||0);
+  for (let i=0;i<5;i++) if (guess[i]===target[i]) &#123;res[i]='ok'; counts[guess[i]]--;&#125;
+  for (let i=0;i<5;i++) if (res[i]==='bad' && (counts[guess[i]]||0)&gt;0)&#123;res[i]='warn'; counts[guess[i]]--;&#125;
+  return res; // ['ok','bad','warn',...]
+&#125;
+</code></pre>
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <section id="installation" class="grid cols-2">
+    <div class="card">
+      <h2>Installation &amp; Start</h2>
+      <ol>
+        <li>Clone/Download Projektordner.</li>
+        <li>Öffne <code>index.html</code> in VS Code.</li>
+        <li>Nutze <span class="kbd">Rechtsklick → Open with Live Server</span> (Extension).</li>
+      </ol>
+      <p><em>Tipp:</em> Ohne Backend funktioniert alles lokal. Für Multiplayer siehe unten.</p>
+    </div>
+    <div class="card">
+      <h2>Optionales Backend (Skizze)</h2>
+      <pre><code>// REST
+GET  /api/daily           // liefert Word-ID
+POST /api/guess           // validiert &amp; bewertet
+GET  /api/leaderboard
+
+// WebSocket Events
+join_room, start_round, guess_submitted, round_result
+</code></pre>
+      <p>Word‑Seed pro Raum sorgt für faires, identisches Zielwort.</p>
+    </div>
+  </section>
+
+  <div class="sep" id="demo"></div>
+
+  <section class="grid cols-2">
+    <div class="card">
+      <h2>Roadmap</h2>
+      <ul>
+        <li>[x] Singleplayer‑Logik &amp; UI</li>
+        <li>[ ] Wörterliste (DE/EN) + Validierung</li>
+        <li>[ ] Dark/Light Toggle</li>
+        <li>[ ] Daily Challenge (Seed)</li>
+        <li>[ ] Multiplayer: Race &amp; Duell</li>
+        <li>[ ] Leaderboard &amp; Profile</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Lizenz &amp; Credits</h2>
+      <p>Dieses Projekt ist als Lern‑ und Portfolio‑Beispiel gedacht. Wörterlisten: z. B. <em>wordfreq</em>, <em>OpenTaal</em> (je nach Lizenz prüfen).</p>
+      <p>Idee inspiriert von <strong>Wordle</strong> (Original von Josh Wardle).</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2025 – Wordle Lernprojekt • Made with ❤ für Web‑Programmierung</p>
+  </footer>
+</div>

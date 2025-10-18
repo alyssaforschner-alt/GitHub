@@ -1,0 +1,14 @@
+<main class="invite-shell">
+  <section class="glass-panel">
+    <h1 class="panel-title">Send Invitation</h1>
+    <form [formGroup]="form" (ngSubmit)="sendInvite()" class="panel-form" novalidate>
+      <label class="field">
+        <span class="visually-hidden">Username</span>
+        <input class="ghost-input" type="text" placeholder="Username" formControlName="username"/>
+      </label>
+      <button class="send-btn" type="submit" [disabled]="isSubmitting()">Send</button>
+    </form>
+    <div class="pill neon" *ngIf="inviteSent() as msg" style="margin-top:8px">{{ msg }}</div>
+  </section>
+</main>
+
