@@ -1,0 +1,3 @@
+[submodule "Backend/wordle"]
+	path = Backend/wordle
+	url = https://github.com/vapets05/wordle.git
