@@ -8,14 +8,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "words")
+@Table(name = "WORD_POOL")
 public class Word 
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "words")
+    @Column(name = "WORD_VALUE", nullable = false, unique = true, length = 5)
     private String value;
     
     public Word() {}

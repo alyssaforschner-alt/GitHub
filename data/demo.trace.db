@@ -1,0 +1,4 @@
+2025-10-18 21:15:32.484241+02:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Tabelle "WORD" nicht gefunden
+Table "WORD" not found; SQL statement:
+select * from word [42102-232]

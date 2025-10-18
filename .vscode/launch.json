@@ -3,6 +3,20 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "java",
+      "name": "Test2Application",
+      "request": "launch",
+      "mainClass": "de.dhbw.stuttgart.test2.Test2Application",
+      "projectName": "test2"
+    },
+    {
+      "type": "java",
+      "name": "DemoApplication",
+      "request": "launch",
+      "mainClass": "com.example.demo.DemoApplication",
+      "projectName": "demo"
+    },
+    {
       "name": "ng serve",
       "type": "chrome",
       "request": "launch",
