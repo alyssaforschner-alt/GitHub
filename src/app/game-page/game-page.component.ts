@@ -1,11 +1,11 @@
-import { Component, HostListener, signal } from '@angular/core';
+import { Component, HostListener, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-game-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, HttpClientModule],
   templateUrl: './game-page.component.html',
   styleUrl: './game-page.component.css'
 })
@@ -29,10 +29,29 @@ export class GamePageComponent {
   private currentRow = 0;
   private currentCol = 0;
 
+  private readonly http = inject(HttpClient);
+
   constructor() {
-    // Zufälliges deutsches Testwort wählen
-    const pick = this.germanWords[Math.floor(Math.random() * this.germanWords.length)];
-    this.target.set(pick);
+    // Try to create a game on the backend; fallback to random word
+    this.createGameOnBackend().catch(() => {
+      const pick = this.germanWords[Math.floor(Math.random() * this.germanWords.length)];
+      this.target.set(pick);
+    });
+  }
+
+  private async createGameOnBackend(): Promise<void> {
+    try {
+      const game = await this.http.post<any>('http://localhost:8080/api/games/start', {}).toPromise();
+      if (game && game.word) {
+        this.target.set(game.word.toUpperCase());
+      } else {
+        // fallback: pick local
+        const pick = this.germanWords[Math.floor(Math.random() * this.germanWords.length)];
+        this.target.set(pick);
+      }
+    } catch (err) {
+      throw err;
+    }
   }
 
   handleKey(key: string): void {
