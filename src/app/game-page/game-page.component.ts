@@ -1,6 +1,9 @@
-import { Component, HostListener, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { OnInit, inject, Component, HostListener, signal } from '@angular/core';
+import { GameService } from '../services/game.service';
+import { AuthService } from '../services/auth.service';
+import { Game } from '../models/game.model';
 
 @Component({
   selector: 'app-game-page',
@@ -9,17 +12,13 @@ import { RouterLink } from '@angular/router';
   templateUrl: './game-page.component.html',
   styleUrl: './game-page.component.css'
 })
-export class GamePageComponent {
+export class GamePageComponent implements OnInit {
   readonly rows = signal<string[][]>(Array.from({ length: 6 }, () => Array(5).fill('')));
   readonly statuses = signal<("ok"|"warn"|"bad"|"")[][]>(Array.from({ length: 6 }, () => Array(5).fill("")));
   readonly kb1 = ['Q','W','E','R','T','Z','U','I','O','P'];
   readonly kb2 = ['A','S','D','F','G','H','J','K','L'];
   readonly kb3 = ['Y','X','C','V','B','N','M'];
   readonly keyState = signal<Record<string, 'ok'|'warn'|'bad' | undefined>>({});
-  readonly target = signal<string>('WORTE'); // Demo-Zielwort (5 Großbuchstaben)
-  private readonly germanWords: string[] = [
-    'WORTE','SPIEL','MAUER','BLATT','TISCH','STERN','WELLE','STEIN','FLUSS','WAGEN','ANGEL','STUHL','FARBE','NACHT','LICHT','PFERD'
-  ];
   readonly isWin = signal(false);
   readonly isGameOver = signal(false);
   readonly toast = signal<string | null>(null);
@@ -28,11 +27,26 @@ export class GamePageComponent {
 
   private currentRow = 0;
   private currentCol = 0;
+  private readonly gameApi = inject(GameService);
+  private readonly auth = inject(AuthService);
+  private userID: number | null = null;
+  private gameID: number | null = null;
 
-  constructor() {
-    // Zufälliges deutsches Testwort wählen
-    const pick = this.germanWords[Math.floor(Math.random() * this.germanWords.length)];
-    this.target.set(pick);
+  async ngOnInit(): Promise<void> {
+    const user = this.auth.getCurrentUser();
+    if (!user) {
+      this.toast.set('Bitte zuerst einloggen.');
+      this.isGameOver.set(true);
+      return;
+    }
+    this.userID = user.userID;
+    try {
+      const game = await this.gameApi.startSingleGame(this.userID);
+      this.gameID = game.gameID;
+    } catch (e) {
+      this.toast.set('Backend nicht erreichbar.');
+      this.isGameOver.set(true);
+    }
   }
 
   handleKey(key: string): void {
@@ -50,9 +64,7 @@ export class GamePageComponent {
     }
 
     if (key === 'ENTER') {
-      if (this.currentCol === 5) {
-        this.scoreRow();
-      }
+      if (this.currentCol === 5) { this.scoreRow(); }
       return;
     }
 
@@ -76,56 +88,61 @@ export class GamePageComponent {
       ev.preventDefault();
       return;
     }
-    // Normalize letters (A-Z); ignore other keys
     const letter = k.length === 1 ? k.toUpperCase() : '';
     if (/^[A-Z]$/.test(letter)) {
       this.handleKey(letter);
     }
   }
 
-  private scoreRow(): void {
+  private async scoreRow(): Promise<void> {
+    if (this.isGameOver() || this.isWin()) return;
+    if (this.userID == null || this.gameID == null) return;
     const rowIndex = this.currentRow;
     const guess = this.rows()[rowIndex].join('');
-    const target = this.target();
-    const res = this.evaluate(guess, target);
+    try {
+      const game: Game = await this.gameApi.guess(guess, this.gameID, this.userID);
 
-    const statuses = this.statuses().map(r => r.slice());
-    for (let i = 0; i < 5; i++) statuses[rowIndex][i] = res[i];
-    this.statuses.set(statuses);
-    this.revealingRow.set(rowIndex);
+      const listRaw = this.userID === game.user2ID ? game.guessesUser2 : game.guessesUser1;
+      const all = (listRaw || '').split(',').filter(Boolean);
+      const last = all[all.length - 1] || '';
+      const parts = last.split(':');
+      const feedback = parts[1] || '';
+      const res = Array.from({ length: 5 }, (_, i) => {
+        const ch = feedback[i];
+        return ch === 'G' ? 'ok' : ch === 'Y' ? 'warn' : 'bad';
+      }) as ("ok"|"warn"|"bad")[];
 
-    // Tastatur färben (ok > warn > bad)
-    const ks = { ...this.keyState() };
-    const prio = (v: 'ok'|'warn'|'bad'|undefined) => v === 'ok' ? 3 : v === 'warn' ? 2 : v === 'bad' ? 1 : 0;
-    for (let i = 0; i < 5; i++) { const ch = guess[i]; const s = res[i]; if (prio(s) > prio(ks[ch])) ks[ch] = s; }
-    this.keyState.set(ks);
+      const statuses = this.statuses().map(r => r.slice());
+      for (let i = 0; i < 5; i++) statuses[rowIndex][i] = res[i];
+      this.statuses.set(statuses);
+      this.revealingRow.set(rowIndex);
 
-    // Nächste Zeile vorbereiten
-    if (this.currentRow < 5) { this.currentRow++; this.currentCol = 0; }
+      const ks = { ...this.keyState() };
+      const prio = (v: 'ok'|'warn'|'bad'|undefined) => v === 'ok' ? 3 : v === 'warn' ? 2 : v === 'bad' ? 1 : 0;
+      for (let i = 0; i < 5; i++) { const ch = guess[i]; const s = res[i]; if (prio(s) > prio(ks[ch])) ks[ch] = s; }
+      this.keyState.set(ks);
 
-    const isWin = guess === target;
-    const flipDuration = 600; // ms
-    const stagger = 120; // ms pro Kachel
-    const total = flipDuration + stagger * 4 + 50;
-    window.setTimeout(() => {
-      this.revealingRow.set(null);
-      if (isWin) {
-        this.isWin.set(true);
-        this.winRowIndex.set(rowIndex);
-        this.toast.set('Richtig!');
-      } else if (rowIndex === 5) {
-        this.isGameOver.set(true);
-        this.toast.set(`Leider falsch. Wort: ${target}`);
-      }
-    }, total);
-  }
+      if (this.currentRow < 5) { this.currentRow++; this.currentCol = 0; }
 
-  private evaluate(guess: string, target: string): ("ok"|"warn"|"bad")[] {
-    const res: ("ok"|"warn"|"bad")[] = Array(5).fill('bad');
-    const counts: Record<string, number> = {};
-    for (let i = 0; i < 5; i++) counts[target[i]] = 1 + (counts[target[i]] || 0);
-    for (let i = 0; i < 5; i++) if (guess[i] === target[i]) { res[i] = 'ok'; counts[guess[i]]--; }
-    for (let i = 0; i < 5; i++) if (res[i] === 'bad' && (counts[guess[i]] || 0) > 0) { res[i] = 'warn'; counts[guess[i]]--; }
-    return res;
+      const didWin = game.status === 'GAME_OVER' && game.winnerUserID === this.userID;
+      const didLose = game.status === 'GAME_OVER' && game.winnerUserID !== this.userID;
+      const flipDuration = 600;
+      const stagger = 120;
+      const total = flipDuration + stagger * 4 + 50;
+      window.setTimeout(() => {
+        this.revealingRow.set(null);
+        if (didWin) {
+          this.isWin.set(true);
+          this.winRowIndex.set(rowIndex);
+          this.toast.set('Richtig!');
+        } else if (didLose || rowIndex === 5) {
+          this.isGameOver.set(true);
+          this.toast.set('Leider falsch.');
+        }
+      }, total);
+    } catch (e: any) {
+      this.toast.set('Wort existiert nicht.');
+    }
   }
 }
+

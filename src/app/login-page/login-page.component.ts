@@ -2,6 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login-page',
@@ -13,6 +15,7 @@ import { Router } from '@angular/router';
 export class LoginPageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
   readonly isSubmitting = signal(false);
 
   readonly form = this.fb.group({
@@ -20,15 +23,19 @@ export class LoginPageComponent {
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
-  async submit(): Promise<void> {
+  submit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.isSubmitting.set(true);
-    await new Promise(r => setTimeout(r, 500));
-    const { username } = this.form.getRawValue();
-    const payload = JSON.stringify({ username, at: Date.now() });
-    localStorage.setItem('worlde-auth', payload);
-    this.isSubmitting.set(false);
-    this.router.navigateByUrl('/home');
+    const { username, password } = this.form.getRawValue();
+    this.auth
+      .login(String(username), String(password))
+      .pipe(finalize(() => this.isSubmitting.set(false)))
+      .subscribe({
+        next: () => this.router.navigateByUrl('/home'),
+        error: () => {
+          // optional: show a brief error message
+        }
+      });
   }
 }
 
