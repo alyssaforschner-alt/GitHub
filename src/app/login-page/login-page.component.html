@@ -1,6 +1,7 @@
 <main class="login-shell">
   <section class="glass-panel">
     <h1 class="panel-title">Login / Register</h1>
+    <!--In diesem Form wird der Benutzername und das Passwort gespeichert werden-->
     <form [formGroup]="form" (ngSubmit)="submit()" class="panel-form" novalidate>
       <label class="field">
         <span class="visually-hidden">Username</span>
@@ -12,6 +13,9 @@
       </label>
       <button class="submit-hidden" type="submit" [disabled]="isSubmitting()">Login</button>
     </form>
+    <div *ngIf="loginMessage()" style="margin-top:18px; color:#fff; text-align:center; font-size:1.1em;">
+      {{ loginMessage() }}
+    </div>
   </section>
 </main>
 
