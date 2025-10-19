@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "WORD_POOL")
+@Table(name = "Words")
 public class Word 
 {
     @Id

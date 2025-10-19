@@ -56,7 +56,7 @@ public class WordService
         if (rawValue == null) {
             return "";
         }
-        return rawValue.trim().toUpperCase(Locale.ROOT);
+        return rawValue.trim().toLowerCase(Locale.ROOT);
     }
 
     private void validate(String value) {

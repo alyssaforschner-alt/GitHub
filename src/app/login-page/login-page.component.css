@@ -24,7 +24,8 @@ font-size: 25px;
 font-style: normal;
 font-weight: 400;
 line-height: normal;
-text-transform: uppercase; 
+text-transform: uppercase;
+margin: 0 0 30px;
 }
 .panel-form{
     /* width:min(460px,92vw); */

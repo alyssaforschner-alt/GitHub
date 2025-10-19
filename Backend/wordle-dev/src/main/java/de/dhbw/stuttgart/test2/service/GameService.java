@@ -34,9 +34,9 @@ public class GameService
 	public Game startSingleGame(Long userID)
 	{
 		Game game = new Game();
-		//game.setWord(wordService.randomWord().getValue());
-		game.setWord("word");
+		game.setWord(wordService.randomWord().getValue());
 		game.setUser1ID(userID);
+		game.setStatus(Status.GAME_ON);
 		return gameRepository.save(game);
 	}
 
@@ -116,85 +116,86 @@ public class GameService
 	public Game checkGuess(String guess, Long gameID, Long userID) 
 	{
 		String who;
-			if(gameRepository.findByUser2IDAndStatus(userID, Status.GAME_ON) != null)
-			{
-				who = "2";
-			}
-			else who = "1";
-			
-			Game game = gameRepository.findByGameID(gameID);
-			final int maxGuess = 6;
-			
-			//check if its a real word
-			Word existing = wordRepository.findByValue(guess.toLowerCase()).orElse(null);
-			if (existing == null) {
-			    throw new IllegalArgumentException("Word not in dictionary!");
-			}
-			
-			//check if its the correct guess
-			if(guess.equals(game.getWord())) 
-			{
-				game.setWinnerUserID(userID);
-				game.setStatus(Status.GAME_OVER);
-				return gameRepository.save(game);
-			}
-			
-			//check if a letter is in the word & the position of the letter
-		    String target = game.getWord().toLowerCase();
-		    guess = guess.toLowerCase();
+		if(gameRepository.findByUser2IDAndStatus(userID, Status.GAME_ON) != null)
+		{
+			who = "2";
+		}
+		else who = "1";
+		
+		Game game = gameRepository.findByGameID(gameID);
+		final int maxGuess = 6;
+		
+		//check if its a real word
+		Word existing = wordRepository.findByValue(guess.toLowerCase()).orElse(null);
 
-		    char[] feedback = new char[target.length()];
-		    for (int i = 0; i < target.length(); i++) {
-		        if (guess.charAt(i) == target.charAt(i)) {
-		            feedback[i] = 'G';//Green - correct position
-		        } else if (target.contains(String.valueOf(guess.charAt(i)))) {
-		            feedback[i] = 'Y';//Yellow - correct letter, wrong position
-		        } else {
-		            feedback[i] = '-';//Gray - not in word
-		        }
+		if (existing == null) {
+		    throw new IllegalArgumentException("Word not in dictionary!");
+		}
+		
+		//check if its the correct guess
+		if(guess.equals(game.getWord())) 
+		{
+			game.setWinnerUserID(userID);
+			game.setStatus(Status.GAME_OVER);
+			return gameRepository.save(game);
+		}
+		
+		//check if a letter is in the word & the position of the letter
+	    String target = game.getWord().toLowerCase();
+	    guess = guess.toLowerCase();
+
+	    char[] feedback = new char[target.length()];
+	    for (int i = 0; i < target.length(); i++) {
+	        if (guess.charAt(i) == target.charAt(i)) {
+	            feedback[i] = 'G';//Green - correct position
+	        } else if (target.contains(String.valueOf(guess.charAt(i)))) {
+	            feedback[i] = 'Y';//Yellow - correct letter, wrong position
+	        } else {
+	            feedback[i] = '-';//Gray - not in word
+	        }
+	    }
+
+	    
+	    String feedbackString = guess + ":" + new String(feedback);
+	    
+	    // increment guess count
+	    //save guess + feedback comma-separated: "apple:G--Y-,grape:YGG--"
+
+	    if(who.equals("1"))
+	    {
+	    	
+		    if (game.getGuessesUser1() == null || game.getGuessesUser1().isEmpty()) {
+		        game.setGuessesUser1(feedbackString);
+		    } else {
+		        game.setGuessesUser1(game.getGuessesUser1() + "," + feedbackString);
 		    }
-
-		    
-		    String feedbackString = guess + ":" + new String(feedback);
-		    
-		    // increment guess count
-		    //save guess + feedback comma-separated: "apple:G--Y-,grape:YGG--"
-
-		    if(who.equals("1"))
-		    {
-		    	
-			    if (game.getGuessesUser1() == null || game.getGuessesUser1().isEmpty()) {
-			        game.setGuessesUser1(feedbackString);
-			    } else {
-			        game.setGuessesUser1(game.getGuessesUser1() + "," + feedbackString);
-			    }
-		    	game.setGuessCount1(game.getGuessCount1() + 1);
-			    // check if player used all guesses
-			    if (game.getGuessCount1() >= maxGuess) {
-			       
-			       game.setStatus(Status.GAME_OVER); // optional
-			       game.setWinnerUserID(game.getUser2ID());
-			    }
+	    	game.setGuessCount1(game.getGuessCount1() + 1);
+		    // check if player used all guesses
+		    if (game.getGuessCount1() >= maxGuess) {
+		       
+		       game.setStatus(Status.GAME_OVER); // optional
+		       game.setWinnerUserID(game.getUser2ID());
 		    }
-		    else 
-		    {
-		    	if (game.getGuessesUser2() == null || game.getGuessesUser2().isEmpty()) {
-			        game.setGuessesUser2(feedbackString);
-			    } else {
-			        game.setGuessesUser2(game.getGuessesUser2() + "," + feedbackString);
-			    }
-		    	game.setGuessCount2(game.getGuessCount2() + 1);
-			    // check if player used all guesses
-			    if (game.getGuessCount2() >= maxGuess) {
-			       
-			       game.setStatus(Status.GAME_OVER); // optional
-			       game.setWinnerUserID(game.getUser1ID());
-			    }
-			}
-		    
+	    }
+	    else 
+	    {
+	    	if (game.getGuessesUser2() == null || game.getGuessesUser2().isEmpty()) {
+		        game.setGuessesUser2(feedbackString);
+		    } else {
+		        game.setGuessesUser2(game.getGuessesUser2() + "," + feedbackString);
+		    }
+	    	game.setGuessCount2(game.getGuessCount2() + 1);
+		    // check if player used all guesses
+		    if (game.getGuessCount2() >= maxGuess) {
+		       
+		       game.setStatus(Status.GAME_OVER); // optional
+		       game.setWinnerUserID(game.getUser1ID());
+		    }
+		}
+	    
 
 
-		    return gameRepository.save(game);
+	    return gameRepository.save(game);
 		
 	}
 	

@@ -1,6 +1,6 @@
 
 /* Layout for start landing content; background comes from .home-background */
-.home-landing{display:grid;place-items:center;text-align:center;position:relative;overflow:hidden;padding:48px 16px}
+.home-landing{display:grid;place-items:center;text-align:center;position:relative;overflow:hidden;padding:48px 16px; row-gap: 44px; }
 
 /* .home-logo{font-size:clamp(56px, 16vw, 120px);line-height:1;margin:0 0 20px;font-weight:300;letter-spacing:.02em;background:linear-gradient(180deg,#c9f7ff 0%, #58e8ff 45%, #1fc9ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 18px rgba(0,234,255,.35), 0 0 36px rgba(82,160,255,.18)} */
 .home-logo{
@@ -16,8 +16,9 @@ background: linear-gradient(96deg, #9FFFFF 5.17%, #21C4FF 100%);
 background-clip: text;
 -webkit-background-clip: text;
 -webkit-text-fill-color: transparent;
-text-shadow: 0 0 10px #FFFFFF;}
-
+text-shadow: 0 0 10px #FFFFFF;
+margin: 0 0 44px;
+}
 
 .home-menu{display:grid;gap:16px;width:min(460px,92vw)}
 .menu-btn{

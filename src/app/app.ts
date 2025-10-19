@@ -16,6 +16,8 @@ export class App implements OnDestroy {
   // Modals
   readonly showHelp = signal(false);
   readonly showHistory = signal(false);
+  readonly showVictory = signal(false);
+  readonly showLost = signal(false);
   readonly showExit = signal(false);
   readonly currentPath = signal<string>('');
 
@@ -73,6 +75,8 @@ export class App implements OnDestroy {
   // Header actions
   openHelp(): void { this.showHelp.set(true); }
   openHistory(): void { this.showHistory.set(true); }
+  openVictory(): void { this.showVictory.set(true); }
+  openLost(): void { this.showVictory.set(true); }
   onHomeClick(): void {
     const path = this.currentPath();
     if (path.startsWith('/spiel')) this.showExit.set(true);
