@@ -19,6 +19,7 @@ export class App implements OnDestroy {
   readonly showVictory = signal(false);
   readonly showLost = signal(false);
   readonly showExit = signal(false);
+  readonly showAccept = signal(false);
   readonly currentPath = signal<string>('');
 
   toggleMenu(): void {
@@ -76,7 +77,8 @@ export class App implements OnDestroy {
   openHelp(): void { this.showHelp.set(true); }
   openHistory(): void { this.showHistory.set(true); }
   openVictory(): void { this.showVictory.set(true); }
-  openLost(): void { this.showVictory.set(true); }
+  openLost(): void { this.showLost.set(true); }
+  openAccept(): void { this.showAccept.set(true); }
   onHomeClick(): void {
     const path = this.currentPath();
     if (path.startsWith('/spiel')) this.showExit.set(true);

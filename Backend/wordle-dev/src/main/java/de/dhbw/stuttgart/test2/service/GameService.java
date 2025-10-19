@@ -133,9 +133,11 @@ public class GameService
 		}
 		
 		//check if its the correct guess
-		if(guess.equals(game.getWord())) 
+		if(guess.toLowerCase().equals(game.getWord())) 
 		{
 			game.setWinnerUserID(userID);
+			String feedbackString = guess + ":" + new String("GGGGG");
+			game.setGuessesUser1(feedbackString);
 			game.setStatus(Status.GAME_OVER);
 			return gameRepository.save(game);
 		}
