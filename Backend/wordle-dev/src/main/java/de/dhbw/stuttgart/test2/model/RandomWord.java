@@ -34,6 +34,6 @@ public class RandomWord {
     }
 
     public void setValue(String value) {
-        this.value = value == null ? null : value.toUpperCase(java.util.Locale.ROOT);
+        this.value = value == null ? null : value.toLowerCase(java.util.Locale.ROOT);
     }
 }
