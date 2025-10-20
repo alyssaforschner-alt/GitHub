@@ -10,6 +10,7 @@ import de.dhbw.stuttgart.test2.model.Status;
 import de.dhbw.stuttgart.test2.model.User;
 import de.dhbw.stuttgart.test2.model.Word;
 import de.dhbw.stuttgart.test2.repository.GameRepository;
+import de.dhbw.stuttgart.test2.repository.RandomWordRepository;
 import de.dhbw.stuttgart.test2.repository.UserRepository;
 import de.dhbw.stuttgart.test2.repository.WordRepository;
 
@@ -18,23 +19,27 @@ import de.dhbw.stuttgart.test2.repository.WordRepository;
 public class GameService 
 {
 	private final GameRepository gameRepository;
-    private final WordService wordService;
+    //private final WordService wordService;
+	private final RandomWordService randomWordService;
     private final UserRepository userRepository; 
     private final WordRepository wordRepository;
+	//private final RandomWordRepository randomWordRepository;
 
     // Spring automatically injects both beans
-    public GameService(GameRepository gameRepository, WordService wordService, UserRepository userRepository, WordRepository wordRepository) {
+    public GameService(GameRepository gameRepository, RandomWordService randomWordService, UserRepository userRepository, WordRepository wordRepository) {
         this.gameRepository = gameRepository;
-        this.wordService = wordService;
+        //this.wordService = wordService;
+		this.randomWordService = randomWordService;
         this.userRepository = userRepository;
         this.wordRepository = wordRepository;
+		//this.randomWordRepository = randomWordRepository;
     }
 
 	//start the game
 	public Game startSingleGame(Long userID)
 	{
 		Game game = new Game();
-		game.setWord(wordService.randomWord().getValue());
+		game.setWord(randomWordService.randomWordValue());
 		game.setUser1ID(userID);
 		game.setStatus(Status.GAME_ON);
 		return gameRepository.save(game);
@@ -82,8 +87,8 @@ public class GameService
 	
 	public Game startMultiGame(Game game)
 	{
-		game.setWord("apple");
-		//game.setWord(wordService.randomWord().getValue());
+		//game.setWord("apple");
+		game.setWord(randomWordService.randomWordValue());
 		game.setStatus(Status.GAME_ON);
 		return game;
 	}
