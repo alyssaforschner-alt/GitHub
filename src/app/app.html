@@ -117,8 +117,8 @@
     </div>
   </section>
 
-  <section class="modal" *ngIf="showAccept()" role="dialog" aria-labelledby="accept-title" aria-modal="true">
-    <h2 id="accept-title" class="modal-title">Accept invitation from: </h2>
+  <section class="modal" *ngIf="showAccept() && currentPath() !== '/login' && !currentPath().startsWith('/spiel')" role="dialog" aria-labelledby="accept-title" aria-modal="true">
+    <h2 id="accept-title" class="modal-title">Accept invitation from: {{ pendingInviteFrom() }}</h2>
     <button class="btn teal" type="button" (click)="acceptInvite()">Accept</button>
     <button class="btn purple" type="button" (click)="declineInvite()">Decline</button>
   </section>

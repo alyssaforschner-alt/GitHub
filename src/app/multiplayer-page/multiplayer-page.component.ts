@@ -58,6 +58,10 @@ export class MultiplayerPageComponent implements OnDestroy {
           clearInterval(this.pollHandle);
           this.pollHandle = null;
           this.router.navigate(['/spiel'], { queryParams: { mode: 'multi', gameID: g.gameID } });
+        } else if (g && g.status === 'DECLINED') {
+          clearInterval(this.pollHandle);
+          this.pollHandle = null;
+          this.inviteSent.set('Invitation declined.');
         }
       } catch {
         // ignore transient errors while polling

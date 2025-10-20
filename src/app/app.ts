@@ -25,6 +25,11 @@ export class App implements OnDestroy {
   readonly currentPath = signal<string>('');
   private invitePollHandle: any = null;
   private pendingInviteGameID: number | null = null;
+  private pollingUserID: number | null = null;
+  readonly pendingInviteFrom = signal<string | null>(null);
+  // Debounce/ignore a just-handled invite for a short period to avoid flicker
+  private suppressInviteID: number | null = null;
+  private suppressInviteUntil = 0;
 
   toggleMenu(): void {
     this.isMenuOpen.update((v) => !v);
@@ -69,14 +74,38 @@ export class App implements OnDestroy {
     this.router.events.subscribe(ev => {
       if (ev instanceof NavigationEnd) {
         setFromUrl(ev.urlAfterRedirects);
+        // Suppress invite polling while on the login or game route
+        const onLogin = this.currentPath() === '/login';
+        const onGame = this.currentPath().startsWith('/spiel');
+        if (onLogin || onGame) {
+          if (this.invitePollHandle) { clearInterval(this.invitePollHandle); this.invitePollHandle = null; }
+          this.pollingUserID = null;
+          this.pendingInviteGameID = null;
+          this.pendingInviteFrom.set(null);
+          this.showAccept.set(false);
+          return;
+        }
         const u = this.auth.getCurrentUser();
-        if (u && !this.invitePollHandle) this.startInvitePolling(u.userID);
+        // Stop polling when no user is logged in
+        if (!u) {
+          if (this.invitePollHandle) { clearInterval(this.invitePollHandle); this.invitePollHandle = null; }
+          this.pollingUserID = null;
+          this.pendingInviteGameID = null;
+          this.showAccept.set(false);
+          this.pendingInviteFrom.set(null);
+          return;
+        }
+        // (Re)start polling when the logged-in user changes
+        if (this.pollingUserID !== u.userID) {
+          if (this.invitePollHandle) { clearInterval(this.invitePollHandle); this.invitePollHandle = null; }
+          this.startInvitePolling(u.userID);
+        }
       }
     });
 
-    // Start invite polling if a user is logged in
+    // Start invite polling if a user is logged in and not on login/game route
     const user = this.auth.getCurrentUser();
-    if (user) this.startInvitePolling(user.userID);
+    if (user && this.currentPath() !== '/login' && !this.currentPath().startsWith('/spiel')) this.startInvitePolling(user.userID);
   }
 
   ngOnDestroy(): void {
@@ -86,6 +115,7 @@ export class App implements OnDestroy {
     window.removeEventListener('singleplayer-victory', this.onSingleVictory as EventListener);
     window.removeEventListener('singleplayer-lost', this.onSingleLost as EventListener);
     if (this.invitePollHandle) { clearInterval(this.invitePollHandle); this.invitePollHandle = null; }
+    this.pollingUserID = null;
   }
 
   private setNeon(on: boolean): void {
@@ -109,7 +139,7 @@ export class App implements OnDestroy {
     if (path.startsWith('/spiel')) this.showExit.set(true);
     else this.router.navigateByUrl('/home');
   }
-  closeModals(): void { this.showHelp.set(false); this.showHistory.set(false); this.showExit.set(false); this.showAccept.set(false); }
+  closeModals(): void { this.showHelp.set(false); this.showHistory.set(false); this.showExit.set(false); this.showAccept.set(false); this.pendingInviteFrom.set(null); }
   confirmExit(): void { this.closeModals(); this.router.navigateByUrl('/home'); }
 
   playAgain(): void {
@@ -138,11 +168,25 @@ export class App implements OnDestroy {
 
   private startInvitePolling(userID: number): void {
     if (this.invitePollHandle) { clearInterval(this.invitePollHandle); this.invitePollHandle = null; }
+    this.pollingUserID = userID;
     this.invitePollHandle = setInterval(async () => {
       try {
-        const g = await this.gameApi.checkInvite(userID);
+        if (this.currentPath() === '/login' || this.currentPath().startsWith('/spiel')) {
+          return; // do not process invites on the login route
+        }
+        const current = this.auth.getCurrentUser();
+        if (!current || current.userID !== this.pollingUserID) {
+          return; // user changed; ignore until interval is reset
+        }
+        const g = await this.gameApi.checkInvite(current.userID);
         if (g && g.status === 'INVITED' && g.gameID && g.gameID !== 0) {
+          // Ignore the same invite for a short grace period after accept/decline
+          if (this.suppressInviteID === g.gameID && Date.now() < this.suppressInviteUntil) {
+            return;
+          }
           this.pendingInviteGameID = g.gameID;
+          const fromName = this.auth.resolveKnownUsername(g.user1ID) ?? `User ${g.user1ID}`;
+          this.pendingInviteFrom.set(fromName);
           this.showAccept.set(true);
         }
       } catch {
@@ -156,10 +200,24 @@ export class App implements OnDestroy {
     const id = this.pendingInviteGameID;
     try {
       await this.gameApi.acceptInvite(id, 'accept');
+      // Ensure the game transitions to GAME_ON promptly
+      try { await this.gameApi.check(id); } catch {}
+      // Suppress any re-prompt for this invite briefly
+      this.suppressInviteID = id;
+      this.suppressInviteUntil = Date.now() + 5000;
+      // Stop invite polling now; router guard will restart as needed later
+      if (this.invitePollHandle) { clearInterval(this.invitePollHandle); this.invitePollHandle = null; }
+      this.pollingUserID = null;
       this.showAccept.set(false);
-      this.router.navigate(['/spiel'], { queryParams: { mode: 'multi', gameID: id } });
+      this.pendingInviteFrom.set(null);
+      this.pendingInviteGameID = null;
     } catch {
       this.showAccept.set(false);
+      this.pendingInviteFrom.set(null);
+      this.pendingInviteGameID = null;
+    } finally {
+      // Navigate to the multiplayer game regardless; server state should settle quickly
+      this.router.navigate(['/spiel'], { queryParams: { mode: 'multi', gameID: id } });
     }
   }
 
@@ -171,7 +229,15 @@ export class App implements OnDestroy {
     } catch {
       // ignore
     } finally {
+      // Suppress any re-prompt for this invite briefly
+      this.suppressInviteID = id;
+      this.suppressInviteUntil = Date.now() + 5000;
+      // Stop invite polling now; router guard will restart as needed later
+      if (this.invitePollHandle) { clearInterval(this.invitePollHandle); this.invitePollHandle = null; }
+      this.pollingUserID = null;
       this.showAccept.set(false);
+      this.pendingInviteFrom.set(null);
+      this.pendingInviteGameID = null;
     }
   }
 }
