@@ -150,11 +150,30 @@ export class App implements OnDestroy {
     if (path.startsWith('/spiel')) this.showExit.set(true);
     else this.router.navigateByUrl('/home');
   }
-  onScrimClick(): void {
+  async onScrimClick(): Promise<void> {
     // If invite popup is open, treat scrim click as decline
     if (this.showAccept()) {
-      if (!this.isHandlingInvite()) this.declineInvite();
+      if (!this.isHandlingInvite()) await this.declineInvite();
       return;
+    }
+    // If closing Victory/Lost after multiplayer, proactively decline any pending invite
+    if (this.showVictory() || this.showLost()) {
+      try {
+        const current = this.auth.getCurrentUser();
+        if (current) {
+          const g = await this.gameApi.checkInvite(current.userID);
+          if (g && g.status === 'INVITED' && g.gameID && g.gameID !== 0) {
+            // Suppress immediate re-popup and send decline so inviter gets feedback
+            this.suppressInviteID = g.gameID;
+            this.suppressInviteUntil = Date.now() + 7000;
+            try { await this.gameApi.acceptInvite(g.gameID, 'decline'); } catch {}
+            // ensure future invites can arrive cleanly
+            this.pendingInviteGameID = null;
+            this.showAccept.set(false);
+          }
+        }
+      } catch { /* ignore */ }
+      try { sessionStorage.removeItem('worlde-rematch-ready'); } catch {}
     }
     this.closeModals();
   }
