@@ -97,7 +97,7 @@
   </section>
 
   <section class="modal" *ngIf="showLost()" role="dialog" aria-labelledby="lost-title" aria-modal="true">
-    <h2 id="lost-title" class="modal-title">Game Over</h2>
+    <h2 id="lost-title" class="modal-title">Game Over<span *ngIf="lostWord()"> - {{ lostWord() }}</span></h2>
     <svg class="lost" xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" fill="none">
       <path
         d="M100 183.333C146.024 183.333 183.333 146.024 183.333 100C183.333 53.9764 146.024 16.6667 100 16.6667C53.9764 16.6667 16.6667 53.9764 16.6667 100C16.6667 146.024 53.9764 183.333 100 183.333Z"
@@ -119,8 +119,8 @@
 
   <section class="modal" *ngIf="showAccept() && currentPath() !== '/login' && !currentPath().startsWith('/spiel')" role="dialog" aria-labelledby="accept-title" aria-modal="true">
     <h2 id="accept-title" class="modal-title">Accept invitation from: {{ pendingInviteFrom() }}</h2>
-    <button class="btn teal" type="button" (click)="acceptInvite()">Accept</button>
-    <button class="btn purple" type="button" (click)="declineInvite()">Decline</button>
+    <button class="btn teal" type="button" (click)="acceptInvite()" [disabled]="isHandlingInvite()">Accept</button>
+    <button class="btn purple" type="button" (click)="declineInvite()" [disabled]="isHandlingInvite()">Decline</button>
   </section>
 
   <section class="modal" *ngIf="showHistory()" role="dialog" aria-labelledby="history-title" aria-modal="true">

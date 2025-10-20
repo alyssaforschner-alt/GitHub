@@ -102,6 +102,8 @@ width: min(704px, 92vw);
 .modal::before{content:none}
 .modal{pointer-events:none}
 .modal .modal-title, .modal .modal-actions, .modal .modal-list, .modal .modal-text{pointer-events:auto}
+/* Allow clicks on modal buttons without changing design */
+.modal .btn{pointer-events:auto}
 .modal .modal-title {
   position: relative;
   z-index: 1; 

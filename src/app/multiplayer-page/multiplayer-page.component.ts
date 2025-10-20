@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnDestroy } from '@angular/core';
+import { Component, signal, inject, OnDestroy, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -13,7 +13,7 @@ import { Game } from '../models/game.model';
   templateUrl: './multiplayer-page.component.html',
   styleUrl: './multiplayer-page.component.css'
 })
-export class MultiplayerPageComponent implements OnDestroy {
+export class MultiplayerPageComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly gameApi = inject(GameService);
   private readonly auth = inject(AuthService);
@@ -22,10 +22,16 @@ export class MultiplayerPageComponent implements OnDestroy {
   readonly inviteSent = signal<string | null>(null);
   private pollHandle: any = null;
   private createdGameID: number | null = null;
+  private static readonly REMATCH_KEY = 'worlde-rematch';
+  private rematchHandled = false;
 
   readonly form = this.fb.group({
     username: ['', [Validators.required, Validators.minLength(3)]],
   });
+
+  ngOnInit(): void {
+    this.maybeStartRematch();
+  }
 
   async sendInvite(): Promise<void> {
     this.inviteSent.set(null);
@@ -62,11 +68,41 @@ export class MultiplayerPageComponent implements OnDestroy {
           clearInterval(this.pollHandle);
           this.pollHandle = null;
           this.inviteSent.set('Invitation declined.');
+          this.createdGameID = null;
         }
       } catch {
         // ignore transient errors while polling
       }
     }, 2000);
+  }
+
+  private maybeStartRematch(): void {
+    if (this.rematchHandled) return;
+    try {
+      const raw = sessionStorage.getItem(MultiplayerPageComponent.REMATCH_KEY);
+      if (!raw) return;
+      const info = JSON.parse(raw) as { role: 'inviter'|'waiter'; opponentID: number; opponentUsername?: string | null };
+      this.rematchHandled = true;
+      if (info.role === 'inviter') {
+        const name = info.opponentUsername ?? this.auth.resolveKnownUsername(info.opponentID) ?? '';
+        if (name) {
+          this.form.patchValue({ username: name });
+          // slight delay to allow view init in case
+          setTimeout(() => this.sendInvite(), 50);
+          this.inviteSent.set(`Rematch invitation sent to ${name}`);
+          // inviter info consumed
+          sessionStorage.removeItem(MultiplayerPageComponent.REMATCH_KEY);
+        } else {
+          this.inviteSent.set('Rematch: Bitte Gegnernamen eingeben.');
+        }
+      } else {
+        // waiter: simply wait for incoming invite
+        this.inviteSent.set('Rematch: Warte auf Einladung des Gegners...');
+        // keep REMATCH_KEY for App auto-accept logic
+      }
+    } catch {
+      // ignore malformed state
+    }
   }
 
   ngOnDestroy(): void {

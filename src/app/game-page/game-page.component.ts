@@ -38,6 +38,19 @@ export class GamePageComponent implements OnInit, OnDestroy {
   private solutionWord: string | null = null;
   private toastAt: number | null = null;
   private toastTimer: any = null;
+  private static readonly REMATCH_KEY = 'worlde-rematch';
+  
+  private persistRematch(g: Game): void {
+    if (!this.isMulti || !g || !this.userID) return;
+    try {
+      const inviterID = g.user1ID;
+      const role = (this.userID === inviterID) ? 'inviter' : 'waiter';
+      const opponentID = (this.userID === inviterID) ? g.user2ID : g.user1ID;
+      const opponentUsername = this.auth.resolveKnownUsername(opponentID) || null as any;
+      const payload = { gameID: g.gameID, inviterID, opponentID, opponentUsername, role, ts: Date.now() };
+      sessionStorage.setItem(GamePageComponent.REMATCH_KEY, JSON.stringify(payload));
+    } catch {}
+  }
 
   async ngOnInit(): Promise<void> {
     const user = this.auth.getCurrentUser();
@@ -61,7 +74,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     try {
       const game = await this.gameApi.startSingleGame(this.userID);
       this.gameID = game.gameID;
-      this.solutionWord = (game.word || '').toUpperCase() || null;
+      this.solutionWord = (game.guessWord || '').toUpperCase() || null;
     } catch (e) {
       // Backend-Fehler: bewusst dauerhaft sichtbar lassen
       this.toast.set('Backend nicht erreichbar.');
@@ -123,11 +136,18 @@ export class GamePageComponent implements OnInit, OnDestroy {
       const game: Game = await this.gameApi.guess(guess, this.gameID, this.userID);
 
       const listRaw = this.userID === game.user2ID ? game.guessesUser2 : game.guessesUser1;
-      this.solutionWord = (game.word || this.solutionWord || '').toUpperCase() || null;
+      this.solutionWord = (game.guessWord || this.solutionWord || '').toUpperCase() || null;
       const all = (listRaw || '').split(',').filter(Boolean);
-      const last = all[all.length - 1] || '';
-      const parts = last.split(':');
-      const feedback = parts[1] || '';
+      let feedback = '';
+      if (game.status === 'GAME_OVER' && game.winnerUserID === this.userID) {
+        // Backend may store the winning feedback only in guessesUser1.
+        // Ensure correct row animation by forcing GGGGG for the winning guess.
+        feedback = 'GGGGG';
+      } else {
+        const last = all[all.length - 1] || '';
+        const parts = last.split(':');
+        feedback = parts[1] || '';
+      }
       const res = Array.from({ length: 5 }, (_, i) => {
         const ch = feedback[i];
         return ch === 'G' ? 'ok' : ch === 'Y' ? 'warn' : 'bad';
@@ -161,21 +181,21 @@ export class GamePageComponent implements OnInit, OnDestroy {
           }
           if (this.isMulti && !this.multiEndNotified) {
             this.multiEndNotified = true;
+            this.persistRematch(game);
             window.dispatchEvent(new CustomEvent('multiplayer-victory'));
           }
         } else if (didLose || rowIndex === 5) {
           this.isGameOver.set(true);
-          if (!this.isMulti && this.solutionWord) {
-            this.showToast(`Leider falsch. Das Wort war: ${this.solutionWord}`);
-          } else {
-            this.showToast('Leider falsch.');
-          }
+          // Show word in Game Over modal via app events
           if (!this.isMulti) {
-            window.dispatchEvent(new CustomEvent('singleplayer-lost'));
+            const word = (this.solutionWord || '').toUpperCase();
+            window.dispatchEvent(new CustomEvent('singleplayer-lost', { detail: { word } }));
           }
           if ((didLose || rowIndex === 5) && this.isMulti && !this.multiEndNotified) {
             this.multiEndNotified = true;
-            window.dispatchEvent(new CustomEvent('multiplayer-lost'));
+            this.persistRematch(game);
+            const word = (this.solutionWord || '').toUpperCase();
+            window.dispatchEvent(new CustomEvent('multiplayer-lost', { detail: { word } }));
           }
         }
       }, total);
@@ -198,8 +218,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
             window.dispatchEvent(new CustomEvent('multiplayer-victory'));
           } else {
             this.isGameOver.set(true);
-            window.dispatchEvent(new CustomEvent('multiplayer-lost'));
+            const word = ((g as any).guessWord || this.solutionWord || '').toUpperCase();
+            window.dispatchEvent(new CustomEvent('multiplayer-lost', { detail: { word } }));
           }
+          this.persistRematch(g);
           clearInterval(this.pollHandle);
           this.pollHandle = null;
         }

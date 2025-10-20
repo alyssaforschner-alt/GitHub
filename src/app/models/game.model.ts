@@ -18,6 +18,6 @@ export interface Game {
   guessCount2: number;
   winnerUserID?: number | null;
   status?: GameStatus | null;
-  word?: string | null;
+  guessWord?: string | null;
 }
 
