@@ -46,6 +46,9 @@ public class Game
 	@Column(name = "winner")
 	private Long winnerUserID;
 	
+	@Column(name = "guessWord")
+	private String guessWord;
+	
 //	@Column(name = "invitationAccepted")
 //	private boolean invitationAccepted;
 	
@@ -137,6 +140,14 @@ public class Game
 
 	public void setWinnerUserID(Long winnerUserID) {
 		this.winnerUserID = winnerUserID;
+	}
+
+	public String getGuessWord() {
+		return status.equals(Status.GAME_OVER) ? word : null;
+	}
+
+	public void setGuessWord(String guessWord) {
+		this.guessWord = guessWord;
 	}
 	
 	
