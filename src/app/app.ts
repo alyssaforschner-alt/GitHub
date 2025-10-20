@@ -46,11 +46,15 @@ export class App implements OnDestroy {
   };
   private onMultiVictory = () => { this.openVictory(); };
   private onMultiLost = () => { this.openLost(); };
+  private onSingleVictory = () => { this.openVictory(); };
+  private onSingleLost = () => { this.openLost(); };
 
   constructor(private readonly router: Router, private readonly gameApi: GameService, private readonly auth: AuthService) {
     window.addEventListener('neon-toggle', this.onNeonToggle as EventListener);
     window.addEventListener('multiplayer-victory', this.onMultiVictory as EventListener);
     window.addEventListener('multiplayer-lost', this.onMultiLost as EventListener);
+    window.addEventListener('singleplayer-victory', this.onSingleVictory as EventListener);
+    window.addEventListener('singleplayer-lost', this.onSingleLost as EventListener);
     // Initialize document class for external pages
     this.applyNeonClass(this.isNeon());
 
@@ -79,6 +83,8 @@ export class App implements OnDestroy {
     window.removeEventListener('neon-toggle', this.onNeonToggle as EventListener);
     window.removeEventListener('multiplayer-victory', this.onMultiVictory as EventListener);
     window.removeEventListener('multiplayer-lost', this.onMultiLost as EventListener);
+    window.removeEventListener('singleplayer-victory', this.onSingleVictory as EventListener);
+    window.removeEventListener('singleplayer-lost', this.onSingleLost as EventListener);
     if (this.invitePollHandle) { clearInterval(this.invitePollHandle); this.invitePollHandle = null; }
   }
 
@@ -105,6 +111,30 @@ export class App implements OnDestroy {
   }
   closeModals(): void { this.showHelp.set(false); this.showHistory.set(false); this.showExit.set(false); this.showAccept.set(false); }
   confirmExit(): void { this.closeModals(); this.router.navigateByUrl('/home'); }
+
+  playAgain(): void {
+    // Close result modals first
+    this.showVictory.set(false);
+    this.showLost.set(false);
+    // Determine current mode from URL (query preserved in router.url)
+    const url = this.router.url || '';
+    const onGame = this.currentPath().startsWith('/spiel');
+    const isMulti = url.includes('mode=multi');
+
+    if (isMulti) {
+      // In multiplayer, go to the multiplayer setup to start a new match
+      this.router.navigateByUrl('/multiplayer');
+      return;
+    }
+
+    // Singleplayer: navigate to game; if already on the game route, detour to force reinit
+    const goToGame = () => this.router.navigate(['/spiel']);
+    if (onGame) {
+      this.router.navigateByUrl('/home').then(() => goToGame());
+    } else {
+      goToGame();
+    }
+  }
 
   private startInvitePolling(userID: number): void {
     if (this.invitePollHandle) { clearInterval(this.invitePollHandle); this.invitePollHandle = null; }

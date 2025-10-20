@@ -153,6 +153,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
           this.isWin.set(true);
           this.winRowIndex.set(rowIndex);
           this.toast.set('Richtig!');
+          if (!this.isMulti) {
+            window.dispatchEvent(new CustomEvent('singleplayer-victory'));
+          }
           if (this.isMulti && !this.multiEndNotified) {
             this.multiEndNotified = true;
             window.dispatchEvent(new CustomEvent('multiplayer-victory'));
@@ -163,6 +166,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.toast.set(`Leider falsch. Das Wort war: ${this.solutionWord}`);
           } else {
             this.toast.set('Leider falsch.');
+          }
+          if (!this.isMulti) {
+            window.dispatchEvent(new CustomEvent('singleplayer-lost'));
           }
           if ((didLose || rowIndex === 5) && this.isMulti && !this.multiEndNotified) {
             this.multiEndNotified = true;
@@ -204,4 +210,3 @@ export class GamePageComponent implements OnInit, OnDestroy {
     if (this.pollHandle) { clearInterval(this.pollHandle); this.pollHandle = null; }
   }
 }
-
