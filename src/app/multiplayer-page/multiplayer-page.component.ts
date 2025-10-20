@@ -57,6 +57,8 @@ export class MultiplayerPageComponent implements OnInit, OnDestroy {
         return;
       }
       this.createdGameID = game.gameID;
+      // Remember opponent name for future rematches
+      try { sessionStorage.setItem('worlde-last-opponent-username', raw); } catch {}
       this.inviteSent.set(`Invitation sent to ${raw}`);
       // Start polling this game until it becomes GAME_ON
       this.startPollingForStart();

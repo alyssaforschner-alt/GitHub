@@ -46,7 +46,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
       const inviterID = g.user1ID;
       const role = (this.userID === inviterID) ? 'inviter' : 'waiter';
       const opponentID = (this.userID === inviterID) ? g.user2ID : g.user1ID;
-      const opponentUsername = this.auth.resolveKnownUsername(opponentID) || null as any;
+      // Prefer the last explicitly entered opponent username (exact backend key)
+      let opponentUsername: string | null = null;
+      try { opponentUsername = sessionStorage.getItem('worlde-last-opponent-username'); } catch {}
+      if (!opponentUsername) {
+        // Fallback to any locally known mapping
+        opponentUsername = (this.auth as any).resolveKnownUsername?.(opponentID) || null;
+      }
       const payload = { gameID: g.gameID, inviterID, opponentID, opponentUsername, role, ts: Date.now() };
       sessionStorage.setItem(GamePageComponent.REMATCH_KEY, JSON.stringify(payload));
     } catch {}

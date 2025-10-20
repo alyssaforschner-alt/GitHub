@@ -150,6 +150,14 @@ export class App implements OnDestroy {
     if (path.startsWith('/spiel')) this.showExit.set(true);
     else this.router.navigateByUrl('/home');
   }
+  onScrimClick(): void {
+    // If invite popup is open, treat scrim click as decline
+    if (this.showAccept()) {
+      if (!this.isHandlingInvite()) this.declineInvite();
+      return;
+    }
+    this.closeModals();
+  }
   closeModals(): void {
     this.showHelp.set(false);
     this.showHistory.set(false);

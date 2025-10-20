@@ -64,7 +64,7 @@
   </div> <!-- /app-content -->
 
   <!-- Modals -->
-  <div class="modal-scrim" *ngIf="showHelp() || showHistory() || showExit() || showVictory() || showLost() || showAccept()" (click)="closeModals()"></div>
+  <div class="modal-scrim" *ngIf="showHelp() || showHistory() || showExit() || showVictory() || showLost() || showAccept()" (click)="onScrimClick()"></div>
 
   <section class="modal" *ngIf="showExit()" role="dialog" aria-labelledby="exit-title" aria-modal="true">
     <h2 id="exit-title" class="modal-title">Do you really want to exit?</h2>
