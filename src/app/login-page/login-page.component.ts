@@ -27,8 +27,11 @@ export class LoginPageComponent {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.isSubmitting.set(true);
     const { username, password } = this.form.getRawValue();
+    // Normalize username: trim + lowercase (backend is case-sensitive)
+    const userN = String(username ?? '').trim().toLowerCase();
+    const pass = String(password ?? '');
     this.auth
-      .login(String(username), String(password))
+      .login(userN, pass)
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
         next: () => this.router.navigateByUrl('/home'),

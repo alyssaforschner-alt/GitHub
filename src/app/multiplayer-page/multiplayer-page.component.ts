@@ -38,12 +38,26 @@ export class MultiplayerPageComponent implements OnInit, OnDestroy {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     const user = this.auth.getCurrentUser();
     if (!user) { this.inviteSent.set('Bitte zuerst einloggen.'); return; }
+    // Normalize username: trim + lowercase to match backend's exact lookup
     const { username } = this.form.getRawValue();
+    const raw = String(username ?? '').trim().toLowerCase();
+    if (!raw) { this.inviteSent.set('Bitte Username eingeben.'); return; }
     this.isSubmitting.set(true);
     try {
-      const game = await this.gameApi.invite(user.userID, String(username));
+      const game = await this.gameApi.invite(user.userID, raw);
+      // Handle NOT_FOUND or invalid response explicitly
+      if (!game || !game.gameID || game.status === 'NOT_FOUND' || !game.user2ID) {
+        this.createdGameID = null;
+        this.inviteSent.set('User nicht gefunden.');
+        return;
+      }
+      if (game.status !== 'INVITED') {
+        this.createdGameID = null;
+        this.inviteSent.set('Einladung konnte nicht erstellt werden.');
+        return;
+      }
       this.createdGameID = game.gameID;
-      this.inviteSent.set(`Invitation sent to ${username}`);
+      this.inviteSent.set(`Invitation sent to ${raw}`);
       // Start polling this game until it becomes GAME_ON
       this.startPollingForStart();
     } catch (e) {
@@ -109,4 +123,3 @@ export class MultiplayerPageComponent implements OnInit, OnDestroy {
     if (this.pollHandle) { clearInterval(this.pollHandle); this.pollHandle = null; }
   }
 }
-
