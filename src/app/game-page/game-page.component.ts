@@ -36,11 +36,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
   private pollHandle: any = null;
   private multiEndNotified = false;
   private solutionWord: string | null = null;
+  private toastAt: number | null = null;
+  private toastTimer: any = null;
 
   async ngOnInit(): Promise<void> {
     const user = this.auth.getCurrentUser();
     if (!user) {
-      this.toast.set('Bitte zuerst einloggen.');
+      this.showToast('Bitte zuerst einloggen.');
       this.isGameOver.set(true);
       return;
     }
@@ -61,6 +63,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
       this.gameID = game.gameID;
       this.solutionWord = (game.word || '').toUpperCase() || null;
     } catch (e) {
+      // Backend-Fehler: bewusst dauerhaft sichtbar lassen
       this.toast.set('Backend nicht erreichbar.');
       this.isGameOver.set(true);
     }
@@ -152,7 +155,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         if (didWin) {
           this.isWin.set(true);
           this.winRowIndex.set(rowIndex);
-          this.toast.set('Richtig!');
+          this.showToast('Richtig!');
           if (!this.isMulti) {
             window.dispatchEvent(new CustomEvent('singleplayer-victory'));
           }
@@ -163,9 +166,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
         } else if (didLose || rowIndex === 5) {
           this.isGameOver.set(true);
           if (!this.isMulti && this.solutionWord) {
-            this.toast.set(`Leider falsch. Das Wort war: ${this.solutionWord}`);
+            this.showToast(`Leider falsch. Das Wort war: ${this.solutionWord}`);
           } else {
-            this.toast.set('Leider falsch.');
+            this.showToast('Leider falsch.');
           }
           if (!this.isMulti) {
             window.dispatchEvent(new CustomEvent('singleplayer-lost'));
@@ -177,7 +180,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         }
       }, total);
     } catch (e: any) {
-      this.toast.set('Wort existiert nicht.');
+      this.showToast('Wort existiert nicht.');
     }
   }
 
@@ -208,5 +211,18 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.pollHandle) { clearInterval(this.pollHandle); this.pollHandle = null; }
+    if (this.toastTimer) { clearTimeout(this.toastTimer); this.toastTimer = null; }
+  }
+
+  private showToast(msg: string, duration = 2000): void {
+    const stamp = Date.now();
+    this.toastAt = stamp;
+    this.toast.set(msg);
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => {
+      if (this.toastAt === stamp) {
+        this.toast.set(null);
+      }
+    }, duration);
   }
 }
