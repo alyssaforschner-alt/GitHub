@@ -150,7 +150,16 @@ export class App implements OnDestroy {
     if (path.startsWith('/spiel')) this.showExit.set(true);
     else this.router.navigateByUrl('/home');
   }
-  closeModals(): void { this.showHelp.set(false); this.showHistory.set(false); this.showExit.set(false); this.showAccept.set(false); this.pendingInviteFrom.set(null); this.lostWord.set(null); }
+  closeModals(): void {
+    this.showHelp.set(false);
+    this.showHistory.set(false);
+    this.showExit.set(false);
+    this.showAccept.set(false);
+    this.showVictory.set(false);
+    this.showLost.set(false);
+    this.pendingInviteFrom.set(null);
+    this.lostWord.set(null);
+  }
   confirmExit(): void { this.closeModals(); this.router.navigateByUrl('/home'); }
 
   playAgain(): void {
@@ -220,7 +229,7 @@ export class App implements OnDestroy {
           } catch { /* ignore malformed state */ }
           // Always keep ID and name in sync
           this.pendingInviteGameID = g.gameID;
-          const fromName = this.auth.resolveKnownUsername(g.user1ID) ?? `User ${g.user1ID}`;
+          const fromName = (g as any).user1Name ?? `User ${g.user1ID}`;
           this.pendingInviteFrom.set(fromName);
           // Only open modal if not already visible
           if (!this.showAccept()) this.showAccept.set(true);
@@ -241,7 +250,7 @@ export class App implements OnDestroy {
         if (!g || !g.gameID || g.status !== 'INVITED') { this.showAccept.set(false); return; }
         id = g.gameID;
         this.pendingInviteGameID = id;
-        const fromName = this.auth.resolveKnownUsername(g.user1ID) ?? `User ${g.user1ID}`;
+        const fromName = (g as any).user1Name ?? `User ${g.user1ID}`;
         this.pendingInviteFrom.set(fromName);
       } catch {
         this.showAccept.set(false); return;
@@ -282,7 +291,7 @@ export class App implements OnDestroy {
         if (!g || !g.gameID || g.status !== 'INVITED') { this.showAccept.set(false); return; }
         id = g.gameID;
         this.pendingInviteGameID = id;
-        const fromName = this.auth.resolveKnownUsername(g.user1ID) ?? `User ${g.user1ID}`;
+        const fromName = (g as any).user1Name ?? `User ${g.user1ID}`;
         this.pendingInviteFrom.set(fromName);
       } catch {
         this.showAccept.set(false); return;
