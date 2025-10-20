@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { OnInit, inject, Component, HostListener, signal } from '@angular/core';
+import { RouterLink, ActivatedRoute } from '@angular/router';
+import { OnInit, OnDestroy, inject, Component, HostListener, signal } from '@angular/core';
 import { GameService } from '../services/game.service';
 import { AuthService } from '../services/auth.service';
 import { Game } from '../models/game.model';
@@ -12,7 +12,7 @@ import { Game } from '../models/game.model';
   templateUrl: './game-page.component.html',
   styleUrl: './game-page.component.css'
 })
-export class GamePageComponent implements OnInit {
+export class GamePageComponent implements OnInit, OnDestroy {
   readonly rows = signal<string[][]>(Array.from({ length: 6 }, () => Array(5).fill('')));
   readonly statuses = signal<("ok"|"warn"|"bad"|"")[][]>(Array.from({ length: 6 }, () => Array(5).fill("")));
   readonly kb1 = ['Q','W','E','R','T','Z','U','I','O','P'];
@@ -29,8 +29,13 @@ export class GamePageComponent implements OnInit {
   private currentCol = 0;
   private readonly gameApi = inject(GameService);
   private readonly auth = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
   private userID: number | null = null;
   private gameID: number | null = null;
+  private isMulti = false;
+  private pollHandle: any = null;
+  private multiEndNotified = false;
+  private solutionWord: string | null = null;
 
   async ngOnInit(): Promise<void> {
     const user = this.auth.getCurrentUser();
@@ -40,9 +45,21 @@ export class GamePageComponent implements OnInit {
       return;
     }
     this.userID = user.userID;
+    // Detect multiplayer mode via query params
+    const qp = this.route.snapshot.queryParamMap;
+    const mode = qp.get('mode');
+    const gid = qp.get('gameID');
+    if (mode === 'multi' && gid) {
+      this.isMulti = true;
+      this.gameID = Number(gid);
+      this.startMultiPolling();
+      return;
+    }
+    // Fallback: start single player game
     try {
       const game = await this.gameApi.startSingleGame(this.userID);
       this.gameID = game.gameID;
+      this.solutionWord = (game.word || '').toUpperCase() || null;
     } catch (e) {
       this.toast.set('Backend nicht erreichbar.');
       this.isGameOver.set(true);
@@ -103,6 +120,7 @@ export class GamePageComponent implements OnInit {
       const game: Game = await this.gameApi.guess(guess, this.gameID, this.userID);
 
       const listRaw = this.userID === game.user2ID ? game.guessesUser2 : game.guessesUser1;
+      this.solutionWord = (game.word || this.solutionWord || '').toUpperCase() || null;
       const all = (listRaw || '').split(',').filter(Boolean);
       const last = all[all.length - 1] || '';
       const parts = last.split(':');
@@ -135,14 +153,55 @@ export class GamePageComponent implements OnInit {
           this.isWin.set(true);
           this.winRowIndex.set(rowIndex);
           this.toast.set('Richtig!');
+          if (this.isMulti && !this.multiEndNotified) {
+            this.multiEndNotified = true;
+            window.dispatchEvent(new CustomEvent('multiplayer-victory'));
+          }
         } else if (didLose || rowIndex === 5) {
           this.isGameOver.set(true);
-          this.toast.set('Leider falsch.');
+          if (!this.isMulti && this.solutionWord) {
+            this.toast.set(`Leider falsch. Das Wort war: ${this.solutionWord}`);
+          } else {
+            this.toast.set('Leider falsch.');
+          }
+          if ((didLose || rowIndex === 5) && this.isMulti && !this.multiEndNotified) {
+            this.multiEndNotified = true;
+            window.dispatchEvent(new CustomEvent('multiplayer-lost'));
+          }
         }
       }, total);
     } catch (e: any) {
       this.toast.set('Wort existiert nicht.');
     }
+  }
+
+  private startMultiPolling(): void {
+    if (!this.gameID) return;
+    if (this.pollHandle) { clearInterval(this.pollHandle); this.pollHandle = null; }
+    this.pollHandle = setInterval(async () => {
+      try {
+        const g: Game = await this.gameApi.check(this.gameID!);
+        if (g && g.status === 'GAME_OVER' && !this.multiEndNotified) {
+          this.multiEndNotified = true;
+          const iWon = g.winnerUserID === this.userID;
+          if (iWon) {
+            this.isWin.set(true);
+            window.dispatchEvent(new CustomEvent('multiplayer-victory'));
+          } else {
+            this.isGameOver.set(true);
+            window.dispatchEvent(new CustomEvent('multiplayer-lost'));
+          }
+          clearInterval(this.pollHandle);
+          this.pollHandle = null;
+        }
+      } catch {
+        // ignore transient errors
+      }
+    }, 2000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollHandle) { clearInterval(this.pollHandle); this.pollHandle = null; }
   }
 }
 
