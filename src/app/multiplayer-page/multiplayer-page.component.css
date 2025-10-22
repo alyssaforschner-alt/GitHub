@@ -28,7 +28,7 @@ text-transform: uppercase;
 .panel-form{width:min(460px,92vw);display:grid;gap:18px}
 .field{display:block}
 .ghost-input{width:100%;height:58px;padding:0 18px; background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.22)), rgba(18,22,36,.65); border:1px solid rgba(255,255,255,.18); box-shadow: inset 0 1px rgba(255,255,255,.08);
-
+color: #FFF;
 font-family: Michroma;
 font-size: 25px;
 font-style: normal;

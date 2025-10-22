@@ -206,7 +206,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         }
       }, total);
     } catch (e: any) {
-      this.showToast('Wort existiert nicht.');
+      this.showToast('Word does not exist');
     }
   }
 

@@ -109,11 +109,11 @@ export class MultiplayerPageComponent implements OnInit, OnDestroy {
           // inviter info consumed
           sessionStorage.removeItem(MultiplayerPageComponent.REMATCH_KEY);
         } else {
-          this.inviteSent.set('Rematch: Bitte Gegnernamen eingeben.');
+          this.inviteSent.set('Rematch: Enter opponent`s username');
         }
       } else {
         // waiter: simply wait for incoming invite
-        this.inviteSent.set('Rematch: Warte auf Einladung des Gegners...');
+        this.inviteSent.set('Rematch: Wait for the invitation...');
         // keep REMATCH_KEY for App auto-accept logic
       }
     } catch {
