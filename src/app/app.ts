@@ -167,6 +167,7 @@ export class App implements OnDestroy {
             this.suppressInviteID = g.gameID;
             this.suppressInviteUntil = Date.now() + 7000;
             try { await this.gameApi.acceptInvite(g.gameID, 'decline'); } catch {}
+            try { window.dispatchEvent(new CustomEvent('rematch-declined')); } catch {}
             // ensure future invites can arrive cleanly
             this.pendingInviteGameID = null;
             this.showAccept.set(false);

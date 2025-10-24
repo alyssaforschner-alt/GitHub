@@ -39,6 +39,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
   private toastAt: number | null = null;
   private toastTimer: any = null;
   private static readonly REMATCH_KEY = 'worlde-rematch';
+  private onRematchDeclined = () => { this.showToast('Invitation declined.'); };
   
   private persistRematch(g: Game): void {
     if (!this.isMulti || !g || !this.userID) return;
@@ -60,6 +61,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     const user = this.auth.getCurrentUser();
+    try { window.addEventListener('rematch-declined', this.onRematchDeclined as EventListener); } catch {}
     if (!user) {
       this.showToast('Bitte zuerst einloggen.');
       this.isGameOver.set(true);
@@ -240,6 +242,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.pollHandle) { clearInterval(this.pollHandle); this.pollHandle = null; }
     if (this.toastTimer) { clearTimeout(this.toastTimer); this.toastTimer = null; }
+    try { window.removeEventListener('rematch-declined', this.onRematchDeclined as EventListener); } catch {}
   }
 
   private showToast(msg: string, duration = 2000): void {

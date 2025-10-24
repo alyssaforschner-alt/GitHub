@@ -14,10 +14,6 @@ export const routes: Routes = [
     loadComponent: () => import('./home-page/home-page.component').then(m => m.HomePageComponent),
   },
   {
-    path: 'highscore',
-    loadComponent: () => import('./highscore-page/highscore-page.component').then(m => m.HighscorePageComponent),
-  },
-  {
     path: 'spiel',
     loadComponent: () => import('./game-page/game-page.component').then(m => m.GamePageComponent),
   },
